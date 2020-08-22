@@ -15,9 +15,9 @@ function test_if_balanced(M)
     return true
 end
 
-function generate_factors(n::Int64)::Tuple{PSYCHOLOGICAL_FACTORS,
-                                          PSYCHOLOGICAL_FACTORS,
-                                          PSYCHOLOGICAL_FACTORS}
+function generate_factors(n::Int64)::Tuple{PSYCHOLOGICAL_FACTOR,
+                                          PSYCHOLOGICAL_FACTOR,
+                                          PSYCHOLOGICAL_FACTOR}
 
     α = WEIGHT.(rand(n))
     β = WEIGHT.(rand(n))
@@ -41,7 +41,12 @@ function generate_opinions(n::Int64)
 end
 
 function generate_opinions(n::Int64, m::Int64)
-end 
+    selector = rand(0:1, n)
+    d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n, m)
+    d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n, m)
+    arr = (selector .* d1) + ((1 .- selector) .* d2)
+    return WEIGHT.(arr)
+end
 
 
 function get_next_opinion(α::PSYCHOLOGICAL_FACTOR,

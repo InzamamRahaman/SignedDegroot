@@ -1,7 +1,7 @@
 using SparseArrays
 using Distributions
 using LinearAlgebra
-WEIGHT = Float16
+WEIGHT = Float32
 Adj_Matrix = SparseMatrixCSC{WEIGHT, Int64}
-OPINIONS = Array{WEIGHT, 1}
+OPINIONS = Union{Array{WEIGHT, 1}, Array{WEIGHT, 2}}
 PSYCHOLOGICAL_FACTOR = Array{WEIGHT, 1}
