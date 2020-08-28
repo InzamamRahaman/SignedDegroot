@@ -33,20 +33,38 @@ function generate_factors(n::Int64)::Tuple{PSYCHOLOGICAL_FACTOR,
 end
 
 function generate_opinions(n::Int64)
-    selector = rand(0:1, n)
-    d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n)
-    d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n)
-    arr = (selector .* d1) + ((1 .- selector) .* d2)
+    base_dist = Uniform(-1.0, 1.0)
+    arr = rand(base_dist, n)
     return WEIGHT.(arr)
 end
 
 function generate_opinions(n::Int64, m::Int64)
-    selector = rand(0:1, n)
-    d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n, m)
-    d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n, m)
-    arr = (selector .* d1) + ((1 .- selector) .* d2)
+    base_dist = Uniform(-1.0, 1.0)
+    arr = rand(base_dist, n, m)
     return WEIGHT.(arr)
 end
+
+function mynorm(M)
+    denom  =
+    return norm(M / denom)
+end
+
+
+# function generate_opinions(n::Int64)
+#     selector = rand(0:1, n)
+#     d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n)
+#     d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n)
+#     arr = (selector .* d1) + ((1 .- selector) .* d2)
+#     return WEIGHT.(arr)
+# end
+#
+# function generate_opinions(n::Int64, m::Int64)
+#     selector = rand(0:1, n)
+#     d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n, m)
+#     d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n, m)
+#     arr = (selector .* d1) + ((1 .- selector) .* d2)
+#     return WEIGHT.(arr)
+# end
 
 
 function get_next_opinion(α::PSYCHOLOGICAL_FACTOR,

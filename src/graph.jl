@@ -28,6 +28,24 @@ function normalize_edgelist!(mat::Adj_Matrix)
     end
 end
 
+function scale_mat!(f::PSYCHOLOGICAL_FACTOR, mat::Adj_Matrix)
+    rows, cols = size(mat)
+    for i = 1:rows
+        @simd for j = 1:cols
+            mat[i, j] *= f[i]
+        end
+    end
+end
+
+function scale_mat!(f::PSYCHOLOGICAL_FACTOR, mat::Array{WEIGHT, 2})
+    rows, cols = size(mat)
+    for i = 1:rows
+        @simd for j = 1:cols
+            mat[i, j] *= f[i]
+        end
+    end
+end
+
 function read_edgelist(s::String)::Tuple{Adj_Matrix, Adj_Matrix, Int64}
     I_pos = Array{Int64, 1}()
     J_pos = Array{Int64, 1}()
@@ -54,10 +72,16 @@ function read_edgelist(s::String)::Tuple{Adj_Matrix, Adj_Matrix, Int64}
                     if w > 0.0
                         push!(I_pos, u)
                         push!(J_pos, v)
+                        push!(I_pos, v)
+                        push!(J_pos, u)
+                        push!(K_pos, w)
                         push!(K_pos, w)
                     elseif w < 0.0
                         push!(I_neg, u)
                         push!(J_neg, v)
+                        push!(I_neg, v)
+                        push!(J_neg, u)
+                        push!(K_neg, w)
                         push!(K_neg, w)
                     end
                 end
@@ -74,4 +98,11 @@ function read_edgelist(s::String)::Tuple{Adj_Matrix, Adj_Matrix, Int64}
 
 
     return (pos, neg, n)
+end
+
+
+function schatten_norm(A, p)
+    inner = tr(A' * A)
+    inner = inner ^ (p / 2)
+    outer = inner ^ 1/p
 end
