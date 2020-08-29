@@ -86,6 +86,8 @@ function get_next_opinion(α::PSYCHOLOGICAL_FACTOR,
     return get_next_opinion(α, β, γ, W, U, y, y)
 end
 
+
+
 function get_sparse_identity(n::Int64)::SparseMatrixCSC{WEIGHT, Int64}
     return sparse(I, n, n)
 end

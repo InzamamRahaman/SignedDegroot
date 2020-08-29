@@ -7,6 +7,7 @@ using DataFrames
 using Statistics
 using Convex
 using SCS
+using LightGraphs
 
 WEIGHT = Float32
 Adj_Matrix = SparseMatrixCSC{WEIGHT, Int64}

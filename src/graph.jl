@@ -46,7 +46,7 @@ function scale_mat!(f::PSYCHOLOGICAL_FACTOR, mat::Array{WEIGHT, 2})
     end
 end
 
-function read_edgelist(s::String)::Tuple{Adj_Matrix, Adj_Matrix, Int64}
+function read_edgelist(s::String, delim::String=" ")::Tuple{Adj_Matrix, Adj_Matrix, Int64}
     I_pos = Array{Int64, 1}()
     J_pos = Array{Int64, 1}()
     K_pos = Array{WEIGHT, 1}()
@@ -62,7 +62,7 @@ function read_edgelist(s::String)::Tuple{Adj_Matrix, Adj_Matrix, Int64}
                 comment = clean_comment(line)
                 n = parse(Int64, comment)
             elseif !startswith(line, "#")
-                contents = map(x -> String(x), split(line))
+                contents = map(x -> String(x), split(line, delim))
                 #(u, v, w) = (0, 0, WEIGHT(1.0))
                 u = parse_node_label(contents[1])
                 v = parse_node_label(contents[2])
@@ -105,4 +105,16 @@ function schatten_norm(A, p)
     inner = tr(A' * A)
     inner = inner ^ (p / 2)
     outer = inner ^ 1/p
+end
+
+
+function construct_graph(A)
+    (n, m) = size(A)
+    g = SimpleGraph(n)
+    for i = 1:n, j = 1:n
+        if A[i, j] != 0
+            add_edge!(g, i, j)
+        end
+    end
+    return g
 end
