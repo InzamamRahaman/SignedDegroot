@@ -46,7 +46,10 @@ function scale_mat!(f::PSYCHOLOGICAL_FACTOR, mat::Array{WEIGHT, 2})
     end
 end
 
-function read_edgelist(s::String, delim::String=" ")::Tuple{Adj_Matrix, Adj_Matrix, Int64}
+
+
+function read_edgelist(s::String,
+        delim::Union{String, Regex})::Tuple{Adj_Matrix, Adj_Matrix, Int64}
     I_pos = Array{Int64, 1}()
     J_pos = Array{Int64, 1}()
     K_pos = Array{WEIGHT, 1}()

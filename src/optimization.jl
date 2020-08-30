@@ -88,6 +88,42 @@ function greedy_approach(Q::Matrix{WEIGHT}, y::OPINIONS, α::PSYCHOLOGICAL_FACTO
     return δ, total_cost, (T * (y + δ))
 end
 
+function select_using_centrality(Q::Matrix{WEIGHT}, y::OPINIONS,
+    α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT,
+    G::SimpleGraph{Int64}, centrality::String)
+
+    centralities = CENTRALITIES[centrality](G)
+    (n, m) = size(Q)
+    T = Q * diagm(α)
+
+    value = fill(WEIGHT(0.0), n)
+    cost = fill(WEIGHT(0.0), n)
+    z_inf = T * y
+    original = norm(z_inf)
+    for i = 1:n
+        value[i] = centralities[i]
+        cost[i] = cost_of_removing(y[i])
+    end
+    perm = sortperm(-value)
+    δ = fill(WEIGHT(0.0), n)
+    total_cost = 0
+    for i ∈ perm
+        if (cost[i] + total_cost) <= budget
+            total_cost += cost[i]
+            δ[i] = -y[i]
+        else
+            remaining = budget - total_cost
+            fraction = sqrt(remaining)
+            δ[i] = -(sign(y[i])) * fraction
+            break
+        end
+    end
+    z = T * (y + δ)
+    return (δ, total_cost, z)
+
+
+end
+
 function select_using_pagerank(Q::Matrix{WEIGHT}, y::OPINIONS,
     α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT, A)
 
@@ -212,63 +248,63 @@ function plot_multiple_series(series)
     end
 end
 
-function main()
-
-    DATASET = "congress"
-    BUDGET = WEIGHT(3.0)
-    filepath = "./data/raw/$(DATASET).edgelist"
-
-
-    @show filepath
-    (W, U, n) = read_edgelist(filepath)
-    normalize_edgelist!(W)
-    normalize_edgelist!(U)
-
-    y = generate_opinions(n)
-    α, β, γ = generate_factors(n)
-    M = (β .* W) - (γ .* U)
-    G = construct_graph(M)
-
-    M = Matrix(M)
-    Q = inv(I - M)
-
-    z = Q * (α .* y)
-
-
-
-    (δ, total_cost, z_prime) =  greedy_approach(Q, y, α,  BUDGET)
-
-
-
-    δ1 = convex_approach(Q, y, α,  BUDGET)
-    res = Q * (α .* (y + δ1))
-
-    (δ, total_cost, z_knap) = fractional_knapsack(Q, y, α,  BUDGET)
-
-    (δ, total_cost, z_page_rank) = select_using_pagerank(Q, y, α,  BUDGET, M)
-
-    @show norm(y)
-    @show norm(z)
-    @show norm(z_prime)
-    @show norm(z_knap)
-    @show norm(z_page_rank)
-    @show norm(res)
-
-    times = n * 2
-
-    trace = fill(WEIGHT(0.0), n, times)
-    trace[:,1] = y
-    for i = 2:times
-        next_opinion = get_next_opinion(α, β, γ,W, U, y, trace[:,i - 1])
-        trace[:,i] = next_opinion
-    end
-
-
-    plot_multiple_series(trace)
-    plot(1:times)
-    return (y, Q, α, δ, total_cost, z_prime, G, trace)
-    # return y, z, res
-end
-
-#y, z, res = main()
-(y, Q, α, δ, total_cost, z_prime, G, trace) = main()
+# function main()
+#
+#     DATASET = "congress"
+#     BUDGET = WEIGHT(3.0)
+#     filepath = "./data/raw/$(DATASET).edgelist"
+#
+#
+#     @show filepath
+#     (W, U, n) = read_edgelist(filepath)
+#     normalize_edgelist!(W)
+#     normalize_edgelist!(U)
+#
+#     y = generate_opinions(n)
+#     α, β, γ = generate_factors(n)
+#     M = (β .* W) - (γ .* U)
+#     G = construct_graph(M)
+#
+#     M = Matrix(M)
+#     Q = inv(I - M)
+#
+#     z = Q * (α .* y)
+#
+#
+#
+#     (δ, total_cost, z_prime) =  greedy_approach(Q, y, α,  BUDGET)
+#
+#
+#
+#     δ1 = convex_approach(Q, y, α,  BUDGET)
+#     res = Q * (α .* (y + δ1))
+#
+#     (δ, total_cost, z_knap) = fractional_knapsack(Q, y, α,  BUDGET)
+#
+#     (δ, total_cost, z_page_rank) = select_using_pagerank(Q, y, α,  BUDGET, M)
+#
+#     @show norm(y)
+#     @show norm(z)
+#     @show norm(z_prime)
+#     @show norm(z_knap)
+#     @show norm(z_page_rank)
+#     @show norm(res)
+#
+#     times = n * 2
+#
+#     trace = fill(WEIGHT(0.0), n, times)
+#     trace[:,1] = y
+#     for i = 2:times
+#         next_opinion = get_next_opinion(α, β, γ,W, U, y, trace[:,i - 1])
+#         trace[:,i] = next_opinion
+#     end
+#
+#
+#     # plot_multiple_series(trace)
+#     # plot(1:times)
+#     return (y, Q, α, δ, total_cost, z_prime, G, trace)
+#     # return y, z, res
+# end
+#
+# #y, z, res = main()
+# (y, Q, α, δ, total_cost, z_prime, G, trace) = main()

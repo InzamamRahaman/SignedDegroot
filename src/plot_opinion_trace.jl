@@ -3,8 +3,9 @@ include("graph.jl")
 include("opinion.jl")
 
 
-function main(dataset="congress", delim=" ")
+function main(dataset="congress")
 
+    delim = DATASETS[dataset]
     DATASET = dataset
     FILEPATH =  "./data/raw/$(DATASET).edgelist"
     PLOT_PATH = "./plots/traces/$(DATASET).png"

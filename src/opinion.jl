@@ -115,3 +115,22 @@ function get_equlibrium(α::PSYCHOLOGICAL_FACTOR,
     Q = get_fundamental_matrix(β, W, γ, U)
     return get_equlibrium(α, Q, y)
 end
+
+
+function compute_num_iters(y::OPINIONS, Q::Array{WEIGHT,2},
+    epsilon::WEIGHT, α::PSYCHOLOGICAL_FACTOR)
+    norm_y = norm(y, Inf)
+    norm_Q = norm(Q, Inf)
+    norm_I_less_A = norm(I - diagm(α), Inf)
+
+    numer = epsilon
+    denom = norm_y * (norm_Q + norm_I_less_A)
+    factor = numer / denom
+    factor = log(factor)
+
+    numer = factor
+    denom = log(norm_Q)
+
+    factor = numer / denom
+    return factor
+end
