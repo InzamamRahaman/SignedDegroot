@@ -56,26 +56,47 @@ function greedy_approach(Q::Matrix{WEIGHT}, y::OPINIONS, α::PSYCHOLOGICAL_FACTO
     total_cost = 0
     prev_len = 0
     to_remove = fill(0, 0)
+
+    # while we can still potentially remove a node's influence
     while total_cost < budget
         current_cost = total_cost
         best_so_far = WEIGHT(Inf)
         current_to_remove = -1
+
+        # consider each node
         for i = 1:n
+            # get cost of adding node
             cost_to_add_i = (cost_of_removing(y[i]) + current_cost)
+
+            # if we have not considered adding that node and
+            # our budget would allow us to add them
             if i ∉ to_remove && (cost_to_add_i <= budget)
+                # consider them
                 push!(to_remove, i)
+                # get change to the norm
                 marginal_norm = norm(mult_but_exclude(T, y, to_remove))
+
+                # if the norm obtained is lower than our current best in this
+                # iteration
                 if marginal_norm < best_so_far
+                    # flag it as the best to remove
                     current_to_remove = i
                     best_so_far = marginal_norm
                 end
+                # pop off to remove temporarily
                 pop!(to_remove)
             end
         end
+
+        # if we found a viable node to remove
         if current_to_remove != -1
+            # add it to remove list
             push!(to_remove, current_to_remove)
         end
-        if (current_cost == total_cost) || (length(to_remove) == n)
+
+        # if (current_cost == total_cost) || (length(to_remove) == n)
+        #     break
+        if (length(to_remove) == n)
             break
         else
             total_cost = current_cost + cost_of_removing(y[to_remove[end]])
@@ -182,8 +203,6 @@ function fractional_knapsack(Q::Matrix{WEIGHT}, y::OPINIONS,
         cost[i] = cost_of_removing(y[i])
     end
 
-
-
     perm = sortperm(-value)
     δ = fill(WEIGHT(0.0), n)
     total_cost = 0
@@ -203,40 +222,6 @@ function fractional_knapsack(Q::Matrix{WEIGHT}, y::OPINIONS,
 end
 
 
-function calculate_ideal_deltas(Q::Matrix{WEIGHT}, y::OPINIONS, α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT)
-
-    (n, m) = size(Q)
-    T = Q * diagm(α)
-    new_vals = fill(WEIGHT(0.0), n)
-    counts = fill(WEIGHT(0.0), n)
-    for i = 1:n
-        if y[i] != 0.0
-            @simd for j = 1:m
-                if (T[i,j] > 0) && (i != j)
-                    counts[j] += 1
-                    numer = -((T[i, :]' * y) - (T[i, j] * y[j]))
-                    denom = T[i,j]
-                    new_vals[j] += (numer / denom)
-                    @show j
-                    @show new_vals[j]
-                end
-            end
-        end
-    end
-
-    @simd for j = 1:n
-        if counts[j] > 0.0
-            new_vals[j] = new_vals[j] / counts[j]
-        else
-            new_vals[j] = y[j]
-        end
-    end
-
-    δ = new_vals - y
-    cost = sum(δ .* δ)
-
-
-end
 
 
 function plot_multiple_series(series)
@@ -247,6 +232,127 @@ function plot_multiple_series(series)
         plot!(p, x, series[i, :])
     end
 end
+
+function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
+     α::PSYCHOLOGICAL_FACTOR, k::Int64)
+    #k = Int64(ceil(compute_num_iters(p.y, p.M, epsilon, p.α)))
+    z = y
+    for i = 1:k
+        z = (α .* y) + (M * z)
+    end
+    return z
+ end
+
+ function greedy_approach_approx(M::SparseMatrixCSC{WEIGHT}, y::OPINIONS,
+     α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT, epsilon::WEIGHT)
+
+     k = Int64(ceil(compute_num_iters(y, M, epsilon, α)))
+
+     (n, m) = size(M)
+     #T = Q * diagm(α)
+     total_cost = 0
+     prev_len = 0
+     to_remove = fill(0, 0)
+
+     # while we can still potentially remove a node's influence
+     while total_cost < budget
+         current_cost = total_cost
+         best_so_far = WEIGHT(Inf)
+         current_to_remove = -1
+
+         # consider each node
+         for i = 1:n
+             # get cost of adding node
+             cost_to_add_i = (cost_of_removing(y[i]) + current_cost)
+
+             # if we have not considered adding that node and
+             # our budget would allow us to add them
+             if i ∉ to_remove && (cost_to_add_i <= budget)
+                 # consider them
+                 push!(to_remove, i)
+                 # get change to the norm
+                 temp_y = copy(y)
+                 temp_y[to_remove] .= 0
+                 temp_eqilibrium = approx_equlibrium_vector(M, temp_y, α, k)
+                 marginal_norm = norm(temp_eqilibrium)
+
+                 # if the norm obtained is lower than our current best in this
+                 # iteration
+                 if marginal_norm < best_so_far
+                     # flag it as the best to remove
+                     current_to_remove = i
+                     best_so_far = marginal_norm
+                 end
+                 # pop off to remove temporarily
+                 pop!(to_remove)
+             end
+         end
+
+         # if we found a viable node to remove
+         if current_to_remove != -1
+             # add it to remove list
+             push!(to_remove, current_to_remove)
+         end
+
+         # if (current_cost == total_cost) || (length(to_remove) == n)
+         #     break
+         if (length(to_remove) == n)
+             break
+         else
+             total_cost = current_cost + cost_of_removing(y[to_remove[end]])
+         end
+     end
+
+     δ = WEIGHT.(zeros(n))
+     δ[to_remove] = -y[to_remove]
+     # @show M
+     # @show y + δ
+     z = approx_equlibrium_vector(M, y + δ, α, k)
+     return δ, total_cost, z
+ end
+
+
+ function fractional_knapsack_approx(M::SparseMatrixCSC{WEIGHT}, y::OPINIONS,
+     α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT, epsilon::WEIGHT)
+
+     k = Int64(ceil(compute_num_iters(y, M, epsilon, α)))
+
+     (n, m) = size(M)
+     value = fill(WEIGHT(0.0), n)
+     cost = fill(WEIGHT(0.0), n)
+     z_inf = approx_equlibrium_vector(M, y, α, k)
+     original = norm(z_inf)
+     for i = 1:n
+         temp_y = copy(y)
+         temp_y[i] = 0
+         v = approx_equlibrium_vector(M, temp_y, α, k)
+         v = norm(z_inf) - norm(v)
+         value[i] = 0
+         if value[i] > 0
+             value[i] = v
+         end
+         cost[i] = cost_of_removing(y[i])
+     end
+
+     perm = sortperm(-value)
+     δ = fill(WEIGHT(0.0), n)
+     total_cost = 0
+     for i ∈ perm
+         if (cost[i] + total_cost) <= budget
+             total_cost += cost[i]
+             δ[i] = -y[i]
+         else
+             remaining = budget - total_cost
+             fraction = sqrt(remaining)
+             δ[i] = -(sign(y[i])) * fraction
+             break
+         end
+     end
+     z = approx_equlibrium_vector(M, y + δ, α, k)
+     return (δ, total_cost, z)
+ end
+
+
 
 # function main()
 #

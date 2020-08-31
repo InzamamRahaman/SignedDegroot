@@ -38,11 +38,12 @@ function generate_opinions(n::Int64)
     return WEIGHT.(arr)
 end
 
-function generate_opinions(n::Int64, m::Int64)
-    base_dist = Uniform(-1.0, 1.0)
-    arr = rand(base_dist, n, m)
-    return WEIGHT.(arr)
-end
+# function generate_opinions(n::Int64, m::Int64)
+#     base_dist = Uniform(-1.0, 1.0)
+#     arr = rand(base_dist, n, m)
+#     return WEIGHT.(arr)
+# end
+
 
 function mynorm(M)
     denom  =
@@ -50,13 +51,20 @@ function mynorm(M)
 end
 
 
-# function generate_opinions(n::Int64)
-#     selector = rand(0:1, n)
-#     d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n)
-#     d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n)
-#     arr = (selector .* d1) + ((1 .- selector) .* d2)
+function generate_opinions(n::Int64)
+    selector = rand(0:1, n)
+    d1 = rand(truncated(Normal(-0.5, 0.1), -1, 0), n)
+    d2 = rand(truncated(Normal(0.5, 0.1), 0, 1), n)
+    arr = (selector .* d1) + ((1 .- selector) .* d2)
+    return WEIGHT.(arr)
+end
+
+# function generate_opinions(n::Int64, m::Int64)
+#     base_dist = Uniform(-1.0, 1.0)
+#     arr = rand(base_dist, n, m)
 #     return WEIGHT.(arr)
 # end
+
 #
 # function generate_opinions(n::Int64, m::Int64)
 #     selector = rand(0:1, n)
@@ -121,6 +129,24 @@ function compute_num_iters(y::OPINIONS, Q::Array{WEIGHT,2},
     epsilon::WEIGHT, α::PSYCHOLOGICAL_FACTOR)
     norm_y = norm(y, Inf)
     norm_Q = norm(Q, Inf)
+    norm_I_less_A = norm(I - diagm(α), Inf)
+
+    numer = epsilon
+    denom = norm_y * (norm_Q + norm_I_less_A)
+    factor = numer / denom
+    factor = log(factor)
+
+    numer = factor
+    denom = log(norm_Q)
+
+    factor = numer / denom
+    return factor
+end
+
+function compute_num_iters(y::OPINIONS, M::SparseMatrixCSC{WEIGHT, Int64},
+    epsilon::WEIGHT, α::PSYCHOLOGICAL_FACTOR)
+    norm_y = norm(y, Inf)
+    norm_Q = norm(M, Inf)
     norm_I_less_A = norm(I - diagm(α), Inf)
 
     numer = epsilon
