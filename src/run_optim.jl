@@ -249,4 +249,4 @@ function main(dataset, epsilon=WEIGHT(0.01))
 
 end
 
-(timings, scores, mean_scores, mean_score_improvements ) = main("congress")
+(timings, scores, mean_scores, mean_score_improvements ) = main("bitcoinotc")
