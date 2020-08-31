@@ -20,7 +20,8 @@ COMMA = ","
 
 DATASETS = Dict("congress"=>WHITESPACE, "wikielections" => WHITESPACE,
                 "cloister" => WHITESPACE, "highlandtribes" => WHITESPACE,
-                "bitcoinotc" => COMMA, "bitcoinalpha" => COMMA)
+                "bitcoinotc" => COMMA, "bitcoinalpha" => COMMA,
+                "twitterreferendum"=>WHITESPACE)
 
 CENTRALITIES = Dict(
     "pagerank" => pagerank,
@@ -28,4 +29,17 @@ CENTRALITIES = Dict(
     "closeness" => closeness_centrality,
     "stress" => stress_centrality,
     "radiality" => radiality_centrality
+)
+
+COLORS = Dict(
+    "complete_centrality_pagerank"   => "#A6CEE3",
+    "complete_knapsack"              => "#B2DF8A",
+    "optimal"                        => "#1F78B4",
+    "fractional_knapsack_approx"     => "#33A02C",
+    "complete_centrality_radiality"  => "#FB9A99",
+    "complete_centrality_stress"     => "#FDBF6F",
+    "greedy_approx"                  => "#FF7F00",
+    "complete_centrality_closeness"  => "#CAB2D6",
+    "complete_centrality_betweeness" => "#6A3D9A",
+    "complete_greedy"                => "#E31A1C"
 )

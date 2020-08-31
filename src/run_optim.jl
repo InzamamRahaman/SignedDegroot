@@ -71,14 +71,14 @@ end
 
 
 function optimize_across_methods(p::ProblemInstance,
-        test_complete=true, budget=WEIGHT(10.0), epsilon=WEIGHT(0.05))
+        test_complete=true, budget=WEIGHT(10.0), epsilon=WEIGHT(0.01))
 
     n = length(p.y)
     #return problem_instance
     timing_results = Dict{String, Float64}()
     polarization_results = Dict{String, WEIGHT}()
 
-    polarization_results["before"] = norm(p.y)/length(p.y)
+    #polarization_results["before"] = norm(p.y)/length(p.y)
 
     if test_complete
         Q = Matrix(I - p.M)
@@ -128,10 +128,71 @@ end
 
 #(timing_results, polarization_results) = main("cloister")
 
+function array_of_dicts_to_dict_of_arrays(d::Array{Dict{String, T}, 1}) where
+        {T <: Number}
+    ks = keys(d[1])
+    ans = Dict{String, Array{T, 1}}()
+    for k in ks
+        ans[k] = Array{T, 1}()
+    end
 
-function main(dataset, epsilon=WEIGHT(0.05))
+    for i = 1:length(d)
+        for (k, v) in d[i]
+            push!(ans[k], v)
+        end
+    end
 
-    budgets = WEIGHT.(1:0.2:5)
+    return ans
+
+end
+
+function mean_of_dict(d::Dict{String, Array{V, 1}}) where {V <: Number}
+
+    ans = Dict{String, Float64}()
+    for (k, v) in d
+        ans[k] = Float64(mean(v))
+    end
+
+    return ans
+
+end
+
+function compute_improvement(d::Dict{String, Array{V, 1}}) where {V <: Number}
+
+    original = d["original"]
+    d1 = Dict{String, Array{V, 1}}()
+    for (k, v) in d
+        improvement = v
+        if k != "original"
+            temp = original - improvement
+            temp = temp ./ original
+            d1[k] = temp * 100
+        end
+    end
+
+    return d1
+
+end
+
+function plot_improvements(scores::Dict{String, Array{WEIGHT,1}},
+        budgets::Array{WEIGHT, 1}, path::String, dataset::String)
+    p = plot(legend=:outertopright)
+    plot!(size=(1000,500))
+    for (k, v) in scores
+        plot!(p, budgets, v, label=k, lw = 3, color=COLORS[k])
+    end
+    xlabel!("Budget")
+    ylabel!("% reduction in polarization")
+    name = dataset
+    name = string(uppercase(name[1])) * name[2:end]
+    title!("Improvement in Polarization by Reduction Method for $(name) Dataset")
+    savefig(path)
+end
+
+
+function main(dataset, epsilon=WEIGHT(0.01))
+
+    budgets = WEIGHT.(1:1:10)
     timings = Array{Dict{String, Float64}, 1}()
     scores = Array{Dict{String, WEIGHT}, 1}()
     p = prep_instance(dataset)
@@ -143,10 +204,20 @@ function main(dataset, epsilon=WEIGHT(0.05))
         push!(scores, score)
     end
 
+    timings = array_of_dicts_to_dict_of_arrays(timings)
+    timings = mean_of_dict(timings)
+    scores = array_of_dicts_to_dict_of_arrays(scores)
+    scores1 = compute_improvement(scores)
+    mean_scores = mean_of_dict(scores)
+
+    plot_path = "./plots/optim_plots/$(dataset).png"
+    plot_improvements(scores1, budgets, plot_path, dataset)
 
 
-    return timings, scores
+
+
+    return timings, scores1, mean_scores
 
 end
 
-(timings, scores) = main("congress")
+(timings, scores, mean_scores) = main("congress")
