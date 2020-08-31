@@ -260,4 +260,4 @@ function main(dataset, epsilon=WEIGHT(0.1))
 
 end
 
-(timings, scores, mean_scores, mean_score_improvements ) = main("highlandtribes")
+(timings, scores, mean_scores, mean_score_improvements ) = main("bitcoinalpha")
