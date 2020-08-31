@@ -85,21 +85,25 @@ function optimize_across_methods(p::ProblemInstance,
 
     println("Processing original")
     t = @elapsed z = get_polarization(Q, p.α, p.y)
+    @show t
     timing_results["original"] = t
     polarization_results["original"] = z/n
 
     println("Processing optimal")
     t = @elapsed δ = apply_convex_approach(p, Q, budget)
+    @show t
     timing_results["optimal"] = t
     polarization_results["optimal"] = get_polarization(Q, p.α, p.y + δ)/n
 
     println("Processing approx knapack")
     t = @elapsed (δ, res) = apply_fractional_knapsack_approx(p, budget, epsilon)
+    @show t
     timing_results["fractional_knapsack_approx"] = t
     polarization_results["fractional_knapsack_approx"] = res/n
 
     println("Processing approx greedy")
     t = @elapsed (δ, res) = apply_greedy_approx(p, budget, epsilon)
+    @show t
     timing_results["greedy_approx"] = t
     polarization_results["greedy_approx"] = res/n
 
@@ -108,12 +112,14 @@ function optimize_across_methods(p::ProblemInstance,
 
         println("Processing knapsack")
         t = @elapsed δ = apply_knapsack_approach(p, Q, budget)
+        @show t
         timing_results["complete_knapsack"] = t
         polarization_results["complete_knapsack"] =
             get_polarization(Q, p.α, p.y + δ)/n
 
         println("Processing greedy")
         t = @elapsed δ = apply_greedy_approach(p, Q, budget)
+        @show t
         timing_results["complete_greedy"] = t
         polarization_results["complete_greedy"] =
             get_polarization(Q, p.α, p.y + δ)/n
@@ -123,6 +129,7 @@ function optimize_across_methods(p::ProblemInstance,
             name = "complete_centrality_$(centrality)"
 
             t = @elapsed δ = apply_selection_by_centrality(p, Q, budget, centrality)
+            @show t
             timing_results[name] = t
             polarization_results[name] =
                 get_polarization(Q, p.α, p.y + δ)/n
@@ -203,7 +210,7 @@ end
 
 function main(dataset, epsilon=WEIGHT(0.1))
 
-    budgets = WEIGHT.(10:10:100)
+    budgets = WEIGHT.(20:20:100)
     timings = Array{Dict{String, Float64}, 1}()
     scores = Array{Dict{String, WEIGHT}, 1}()
     p = prep_instance(dataset)
