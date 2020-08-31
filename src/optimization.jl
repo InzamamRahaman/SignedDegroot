@@ -92,7 +92,7 @@ function greedy_approach(Q::Matrix{WEIGHT}, y::OPINIONS, α::PSYCHOLOGICAL_FACTO
         if current_to_remove != -1
             # add it to remove list
             push!(to_remove, current_to_remove)
-             @show current_to_remove
+             #@show current_to_remove
         end
 
         # if (current_cost == total_cost) || (length(to_remove) == n)
@@ -292,7 +292,7 @@ function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
          if current_to_remove != -1
              # add it to remove list
              push!(to_remove, current_to_remove)
-             @show current_to_remove
+             #@show current_to_remove
          end
 
          # if (current_cost == total_cost) || (length(to_remove) == n)
