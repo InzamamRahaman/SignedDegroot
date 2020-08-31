@@ -148,9 +148,9 @@ end
 
 function mean_of_dict(d::Dict{String, Array{V, 1}}) where {V <: Number}
 
-    ans = Dict{String, Float64}()
+    ans = Dict{String, Array{Float64, 1}}()
     for (k, v) in d
-        ans[k] = Float64(mean(v))
+        ans[k] = [Float64(mean(v)), Float64(std(v))]
     end
 
     return ans
@@ -209,15 +209,44 @@ function main(dataset, epsilon=WEIGHT(0.01))
     scores = array_of_dicts_to_dict_of_arrays(scores)
     scores1 = compute_improvement(scores)
     mean_scores = mean_of_dict(scores)
+    mean_score_improvements = mean_of_dict(scores1)
 
     plot_path = "./plots/optim_plots/$(dataset).png"
     plot_improvements(scores1, budgets, plot_path, dataset)
 
+    stringdata = JSON.json(timings)
+
+    open("./results/$(dataset)-timings.json", "w") do f
+        write(f, stringdata)
+    end
+
+    stringdata = JSON.json(scores1)
+
+    open("./results/$(dataset)-scores.json", "w") do f
+        write(f, stringdata)
+    end
+
+    stringdata = JSON.json(mean_scores)
+
+    open("./results/$(dataset)-mean-scores.json", "w") do f
+        write(f, stringdata)
+    end
+
+    stringdata = JSON.json(mean_score_improvements)
+
+    open("./results/$(dataset)-mean-scores-improvements.json", "w") do f
+        write(f, stringdata)
+    end
 
 
 
-    return timings, scores1, mean_scores
+
+
+
+
+
+    return timings, scores1, mean_scores, mean_score_improvements
 
 end
 
-(timings, scores, mean_scores) = main("congress")
+(timings, scores, mean_scores, mean_score_improvements ) = main("congress")
