@@ -177,7 +177,8 @@ end
 function plot_improvements(scores::Dict{String, Array{WEIGHT,1}},
         budgets::Array{WEIGHT, 1}, path::String, dataset::String)
     p = plot(legend=:outertopright)
-    plot!(size=(1000,500))
+    plot!(size=(1000,900))
+    plot!([1], [100], label = "", linealpha=1.0)
     for (k, v) in scores
         plot!(p, budgets, v, label=k, lw = 3, color=COLORS[k])
     end
@@ -249,4 +250,4 @@ function main(dataset, epsilon=WEIGHT(0.01))
 
 end
 
-(timings, scores, mean_scores, mean_score_improvements ) = main("cloister")
+(timings, scores, mean_scores, mean_score_improvements ) = main("congress")
