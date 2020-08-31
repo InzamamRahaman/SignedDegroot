@@ -220,6 +220,7 @@ function main(dataset, epsilon=WEIGHT(0.1))
         timing, score = optimize_across_methods(p, true, budget, epsilon)
         push!(timings, timing)
         push!(scores, score)
+        sleep(120)
     end
 
     timings = array_of_dicts_to_dict_of_arrays(timings)
