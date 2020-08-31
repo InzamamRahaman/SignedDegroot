@@ -203,7 +203,7 @@ end
 
 function main(dataset, epsilon=WEIGHT(0.1))
 
-    budgets = WEIGHT.(1:10:100)
+    budgets = WEIGHT.(10:10:100)
     timings = Array{Dict{String, Float64}, 1}()
     scores = Array{Dict{String, WEIGHT}, 1}()
     p = prep_instance(dataset)
