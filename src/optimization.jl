@@ -92,6 +92,7 @@ function greedy_approach(Q::Matrix{WEIGHT}, y::OPINIONS, α::PSYCHOLOGICAL_FACTO
         if current_to_remove != -1
             # add it to remove list
             push!(to_remove, current_to_remove)
+             @show current_to_remove
         end
 
         # if (current_cost == total_cost) || (length(to_remove) == n)
@@ -251,11 +252,10 @@ function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
      (n, m) = size(M)
      #T = Q * diagm(α)
      total_cost = 0
-     prev_len = 0
      to_remove = fill(0, 0)
 
      # while we can still potentially remove a node's influence
-     while total_cost < budget
+     while (total_cost < budget) && (length(to_remove) < n)
          current_cost = total_cost
          best_so_far = WEIGHT(Inf)
          current_to_remove = -1
@@ -292,15 +292,12 @@ function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
          if current_to_remove != -1
              # add it to remove list
              push!(to_remove, current_to_remove)
+             @show current_to_remove
          end
 
          # if (current_cost == total_cost) || (length(to_remove) == n)
          #     break
-         if (length(to_remove) == n)
-             break
-         else
-             total_cost = current_cost + cost_of_removing(y[to_remove[end]])
-         end
+         total_cost = current_cost + cost_of_removing(y[to_remove[end]])
      end
 
      δ = WEIGHT.(zeros(n))

@@ -26,10 +26,23 @@ DATASETS = Dict("congress"=>WHITESPACE, "wikielections" => WHITESPACE,
 
 CENTRALITIES = Dict(
     "pagerank" => pagerank,
-    "betweeness" => betweenness_centrality,
-    "closeness" => closeness_centrality,
+    #"betweeness" => betweenness_centrality,
+    #"closeness" => closeness_centrality,
     "stress" => stress_centrality,
-    "radiality" => radiality_centrality
+    #"radiality" => radiality_centrality
+)
+
+MARKERS = Dict(
+    "complete_centrality_pagerank"   => :+,
+    "complete_knapsack"              => :circle,
+    "optimal"                        => :none,
+    "fractional_knapsack_approx"     => :diamond,
+    "complete_centrality_radiality"  => :dtriangle,
+    "complete_centrality_stress"     => :hexagon,
+    "greedy_approx"                  => :rect,
+    "complete_centrality_closeness"  => :star4,
+    "complete_centrality_betweeness" => :cross,
+    "complete_greedy"                => :star5
 )
 
 COLORS = Dict(

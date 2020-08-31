@@ -80,29 +80,45 @@ function optimize_across_methods(p::ProblemInstance,
 
     #polarization_results["before"] = norm(p.y)/length(p.y)
 
+    Q = Matrix(I - p.M)
+    Q = inv(Q)
+
+    println("Processing original")
+    t = @elapsed z = get_polarization(Q, p.α, p.y)
+    timing_results["original"] = t
+    polarization_results["original"] = z/n
+
+    println("Processing optimal")
+    t = @elapsed δ = apply_convex_approach(p, Q, budget)
+    timing_results["optimal"] = t
+    polarization_results["optimal"] = get_polarization(Q, p.α, p.y + δ)/n
+
+    println("Processing approx knapack")
+    t = @elapsed (δ, res) = apply_fractional_knapsack_approx(p, budget, epsilon)
+    timing_results["fractional_knapsack_approx"] = t
+    polarization_results["fractional_knapsack_approx"] = res/n
+
+    println("Processing approx greedy")
+    t = @elapsed (δ, res) = apply_greedy_approx(p, budget, epsilon)
+    timing_results["greedy_approx"] = t
+    polarization_results["greedy_approx"] = res/n
+
     if test_complete
-        Q = Matrix(I - p.M)
-        Q = inv(Q)
-
-        t = @elapsed z = get_polarization(Q, p.α, p.y)
-        timing_results["original"] = t
-        polarization_results["original"] = z/n
 
 
-        t = @elapsed δ = apply_convex_approach(p, Q, budget)
-        timing_results["optimal"] = t
-        polarization_results["optimal"] = get_polarization(Q, p.α, p.y + δ)/n
-
+        println("Processing knapsack")
         t = @elapsed δ = apply_knapsack_approach(p, Q, budget)
         timing_results["complete_knapsack"] = t
         polarization_results["complete_knapsack"] =
             get_polarization(Q, p.α, p.y + δ)/n
 
+        println("Processing greedy")
         t = @elapsed δ = apply_greedy_approach(p, Q, budget)
         timing_results["complete_greedy"] = t
         polarization_results["complete_greedy"] =
             get_polarization(Q, p.α, p.y + δ)/n
 
+        println("Processing centralities")
         for centrality in keys(CENTRALITIES)
             name = "complete_centrality_$(centrality)"
 
@@ -113,13 +129,6 @@ function optimize_across_methods(p::ProblemInstance,
         end
     end
 
-    t = @elapsed (δ, res) = apply_fractional_knapsack_approx(p, budget, epsilon)
-    timing_results["fractional_knapsack_approx"] = t
-    polarization_results["fractional_knapsack_approx"] = res/n
-
-    t = @elapsed (δ, res) = apply_greedy_approx(p, budget, epsilon)
-    timing_results["greedy_approx"] = t
-    polarization_results["greedy_approx"] = res/n
 
 
 
@@ -180,7 +189,8 @@ function plot_improvements(scores::Dict{String, Array{WEIGHT,1}},
     plot!(size=(1000,900))
     plot!([1], [100], label = "", linealpha=1.0)
     for (k, v) in scores
-        plot!(p, budgets, v, label=k, lw = 3, color=COLORS[k])
+        plot!(p, budgets, v, label=k, lw = 3,
+            color=COLORS[k], markershape=MARKERS[k], seriestype=:line,)
     end
     xlabel!("Budget")
     ylabel!("% reduction in polarization")
@@ -191,7 +201,7 @@ function plot_improvements(scores::Dict{String, Array{WEIGHT,1}},
 end
 
 
-function main(dataset, epsilon=WEIGHT(0.01))
+function main(dataset, epsilon=WEIGHT(0.1))
 
     budgets = WEIGHT.(1:1:10)
     timings = Array{Dict{String, Float64}, 1}()
