@@ -308,6 +308,23 @@ function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
      return δ, total_cost, z
  end
 
+function get_approx_mat(M::SparseMatrixCSC{WEIGHT}, α::PSYCHOLOGICAL_FACTOR, k::Int64)
+
+    p1 = M ^ 0
+    powers = Array{SparseMatrixCSC{WEIGHT}, 1}()
+    push!(powers, p1)
+    for i = 1:k
+        temp = powers[i] * M
+        push!(powers, temp)
+    end
+
+    p2 = sum(powers[1:end-1]) * diagm(α)
+    p2 += powers[end]
+    return p2
+
+end
+
+
 
  function fractional_knapsack_approx(M::SparseMatrixCSC{WEIGHT}, y::OPINIONS,
      α::PSYCHOLOGICAL_FACTOR, budget::WEIGHT, epsilon::WEIGHT)
@@ -317,12 +334,16 @@ function approx_equlibrium_vector(M::SparseMatrixCSC, y::OPINIONS,
      (n, m) = size(M)
      value = fill(WEIGHT(0.0), n)
      cost = fill(WEIGHT(0.0), n)
+     # T = get_approx_mat(M, α, k)
+     # @show T
+     # z_inf = norm(T * y)
      z_inf = approx_equlibrium_vector(M, y, α, k)
      original = norm(z_inf)
      for i = 1:n
          temp_y = copy(y)
          temp_y[i] = 0
          v = approx_equlibrium_vector(M, temp_y, α, k)
+         #v = T * temp_y
          v = norm(z_inf) - norm(v)
          value[i] = 0
          if value[i] > 0

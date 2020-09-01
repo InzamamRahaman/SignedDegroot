@@ -210,7 +210,7 @@ end
 
 function main(dataset, epsilon=WEIGHT(0.1))
 
-    budgets = WEIGHT.(20:20:100)
+    budgets = WEIGHT.(1:2)
     timings = Array{Dict{String, Float64}, 1}()
     scores = Array{Dict{String, WEIGHT}, 1}()
     p = prep_instance(dataset)
@@ -220,7 +220,7 @@ function main(dataset, epsilon=WEIGHT(0.1))
         timing, score = optimize_across_methods(p, true, budget, epsilon)
         push!(timings, timing)
         push!(scores, score)
-        sleep(120)
+        #sleep(120)
     end
 
     timings = array_of_dicts_to_dict_of_arrays(timings)
@@ -268,4 +268,4 @@ function main(dataset, epsilon=WEIGHT(0.1))
 
 end
 
-(timings, scores, mean_scores, mean_score_improvements ) = main("bitcoinalpha")
+(timings, scores, mean_scores, mean_score_improvements ) = main("congress")
