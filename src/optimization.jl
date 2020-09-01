@@ -122,8 +122,9 @@ function select_using_centrality(Q::Matrix{WEIGHT}, y::OPINIONS,
     cost = fill(WEIGHT(0.0), n)
     z_inf = T * y
     original = norm(z_inf)
+    mean_y = mean(y)
     for i = 1:n
-        value[i] = centralities[i]
+        value[i] = 1 * centralities[i]
         cost[i] = cost_of_removing(y[i])
     end
     perm = sortperm(-value)
