@@ -101,11 +101,11 @@ function optimize_across_methods(p::ProblemInstance,
     timing_results["fractional_knapsack_approx"] = t
     polarization_results["fractional_knapsack_approx"] = res/n
 
-    println("Processing approx greedy")
-    t = @elapsed (δ, res) = apply_greedy_approx(p, budget, epsilon)
-    @show t
-    timing_results["greedy_approx"] = t
-    polarization_results["greedy_approx"] = res/n
+    # println("Processing approx greedy")
+    # t = @elapsed (δ, res) = apply_greedy_approx(p, budget, epsilon)
+    # @show t
+    # timing_results["greedy_approx"] = t
+    # polarization_results["greedy_approx"] = res/n
 
     if test_complete
 
@@ -117,12 +117,12 @@ function optimize_across_methods(p::ProblemInstance,
         polarization_results["complete_knapsack"] =
             get_polarization(Q, p.α, p.y + δ)/n
 
-        println("Processing greedy")
-        t = @elapsed δ = apply_greedy_approach(p, Q, budget)
-        @show t
-        timing_results["complete_greedy"] = t
-        polarization_results["complete_greedy"] =
-            get_polarization(Q, p.α, p.y + δ)/n
+        # println("Processing greedy")
+        # t = @elapsed δ = apply_greedy_approach(p, Q, budget)
+        # @show t
+        # timing_results["complete_greedy"] = t
+        # polarization_results["complete_greedy"] =
+        #     get_polarization(Q, p.α, p.y + δ)/n
 
         println("Processing centralities")
         for centrality in keys(CENTRALITIES)
